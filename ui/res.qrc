@@ -1,0 +1,14 @@
+<RCC>
+  <qresource prefix="ui">
+    <file>checked.png</file>
+    <file>combobox_arrow.png</file>
+    <file>combobox_arrow_2.png</file>
+    <file>combobox_arrow_flip.png</file>
+    <file>cross.png</file>
+    <file>cross2.png</file>
+    <file>minus.png</file>
+    <file>minus2.png</file>
+    <file>refresh.png</file>
+    <file>refresh2.png</file>
+  </qresource>
+</RCC>
