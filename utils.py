@@ -24,8 +24,8 @@ from PyQt6.QtGui import (
 
 class WidgetEffects:
     @staticmethod
-    def apply_shadow(widget, blur_radius=10, offset=(0, 2), color=QColor(0, 0, 0, 120)):
-        """Ajoute une ombre portée à un widget."""
+    def apply_shadow(widget: QWidget, blur_radius: int = 10, offset: tuple = (0, 2), color: QColor = QColor(0, 0, 0, 120)) -> None:
+        """Add a drop shadow effect to a widget."""
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(blur_radius)
         shadow.setOffset(*offset)
@@ -33,14 +33,14 @@ class WidgetEffects:
         widget.setGraphicsEffect(shadow)
 
     @staticmethod
-    def apply_hover_animation(widget, start_geometry, end_geometry, duration=50):
-        """Ajoute une animation d'agrandissement au survol."""
+    def apply_hover_animation(widget: QWidget, start_geometry: QRect, end_geometry: QRect, duration: int = 50) -> None:
+        """Add a hover animation to a widget."""
         animation = QPropertyAnimation(widget, b"geometry")
         animation.setDuration(duration)
         animation.setStartValue(start_geometry)
         animation.setEndValue(end_geometry)
 
-        # Connecter l'animation aux événements de survol
+        # Connect the animation to hover events
         def on_hover_enter():
             animation.setDirection(QPropertyAnimation.Direction.Forward)
             animation.start()
@@ -53,10 +53,8 @@ class WidgetEffects:
         widget.leaveEvent = lambda event: on_hover_leave()
 
     @staticmethod
-    def apply_font_animation(
-        widget, start_size, end_size, duration=50, font_family="Arial"
-    ):
-        """Ajoute une animation pour changer la taille de la police."""
+    def apply_font_animation(widget: QWidget, start_size: int, end_size: int, duration: int = 50, font_family: str = "Arial") -> None:
+        """Add an animation to change the font size of a widget."""
         animation = QVariantAnimation()
         animation.setStartValue(start_size)
         animation.setEndValue(end_size)
@@ -70,106 +68,100 @@ class WidgetEffects:
 
         animation.valueChanged.connect(update_font)
 
-        # Connecter l'animation aux événements de survol
+        # Connect the animation to hover events
         widget.enterEvent = lambda event: animation.start()
 
 
 class PlumbobBackground(QLabel):
-
-    def __init__(self, color=QColor(0, 192, 0), parent=None):
+    def __init__(self, color: QColor = QColor(0, 192, 0), parent: QWidget = None):
         super().__init__(parent)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.shape_color = color  # Initialisation de la couleur du losange
+        self.shape_color = color  # Initialize the color of the diamond
 
-    def paintEvent(self, event):
+    def paintEvent(self, event: QPaintEvent) -> None:
+        """Handle the paint event to draw the diamond shape."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        # Désactiver le contour et définir la couleur de remplissage
+        # Disable the outline and set the fill color
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(self.shape_color)
 
-        # Définir les points du losange
+        # Define the points of the diamond
         points = [
-            QPoint(self.width() // 2, 0),  # Haut
-            QPoint(self.width(), self.height() // 2),  # Droite
-            QPoint(self.width() // 2, self.height()),  # Bas
-            QPoint(0, self.height() // 2),  # Gauche
+            QPoint(self.width() // 2, 0),  # Top
+            QPoint(self.width(), self.height() // 2),  # Right
+            QPoint(self.width() // 2, self.height()),  # Bottom
+            QPoint(0, self.height() // 2),  # Left
         ]
 
-        # Dessiner le losange
+        # Draw the diamond
         painter.drawPolygon(*points)
 
-    def change_color(self, color):
-        """Change la couleur du losange et redessine le widget."""
+    def change_color(self, color: QColor) -> None:
+        """Change the color of the diamond and redraw the widget."""
         self.shape_color = color
         self.update()
 
 
 class PlumbobShine(QLabel):
-    mouseEvent = pyqtSignal(QColor,str)
+    mouseEvent = pyqtSignal(QColor, str)
 
-    def __init__(self,color, parent=None):
+    def __init__(self, color: QColor, parent: QWidget = None):
         super().__init__(parent)
-        self.mouse_inside = False  # Suivi de l'état de la souris
+        self.mouse_inside = False  # Track the state of the mouse
         self.color = color
 
-    # Quand la souris entre dans le widget
-    def enterEvent(self, event):
-        self.mouseEvent.emit(self.color,"enter")
-        super().enterEvent(event)  # Appel à la méthode de la classe parente
+    def enterEvent(self, event: QMouseEvent) -> None:
+        """Handle the event when the mouse enters the widget."""
+        self.mouseEvent.emit(self.color, "enter")
+        super().enterEvent(event)
 
-    # Quand la souris quitte le widget
-    def leaveEvent(self, event):
-        self.mouseEvent.emit(self.color,"leave")
-        super().leaveEvent(event)  # Appel à la méthode de la classe parente
+    def leaveEvent(self, event: QMouseEvent) -> None:
+        """Handle the event when the mouse leaves the widget."""
+        self.mouseEvent.emit(self.color, "leave")
+        super().leaveEvent(event)
 
-    # Quand un clic de souris est effectué sur le widget
-    def mousePressEvent(self, event):
-        self.mouseEvent.emit(self.color,"clic")  # Emission du signal "click"
-        super().mousePressEvent(event)  # Appel à la méthode de la classe parente
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        """Handle the event when the mouse is pressed on the widget."""
+        self.mouseEvent.emit(self.color, "clic")
+        super().mousePressEvent(event)
 
-    # Quand un relâchement de la souris est effectué sur le widget
-    def mouseReleaseEvent(self, event):
-        self.mouseEvent.emit(self.color,"release")  # Emission du signal "release"
-        super().mouseReleaseEvent(event)  # Appel à la méthode de la classe parente
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        """Handle the event when the mouse is released on the widget."""
+        self.mouseEvent.emit(self.color, "release")
+        super().mouseReleaseEvent(event)
 
 
 class QPlumbob:
-    def __init__(
-        self,
-        parent,
-        geometry,
-        initial_color=QColor(0, 192, 0),
-        image_path="ui/plumbob_shine.png",
-    ):
+    def __init__(self, parent: QWidget, geometry: tuple, initial_color: QColor = QColor(0, 192, 0), image_path: str = "ui/plumbob_shine.png"):
         """
-        Initialise un QPlumbob avec une couleur et une géométrie.
+        Initialize a QPlumbob with a color and geometry.
 
-        :param parent: Parent du widget.
-        :param geometry: Tuple (x, y, width, height) pour définir la géométrie.
-        :param initial_color: Couleur initiale du losange.
-        :param image_path: Chemin vers l'image PNG avec transparence.
+        :param parent: Parent widget.
+        :param geometry: Tuple (x, y, width, height) to define the geometry.
+        :param initial_color: Initial color of the diamond.
+        :param image_path: Path to the PNG image with transparency.
         """
         self.parent = parent
         self.geometry = geometry
         self.initial_color = initial_color
         self.image_path = image_path
 
-        # Créer et configurer le QLabel pour le losange
+        # Create and configure the QLabel for the diamond
         self.plumbobBG = PlumbobBackground(color=initial_color, parent=parent)
         self.plumbobBG.setGeometry(*geometry)
         WidgetEffects.apply_shadow(self.plumbobBG)
-        # Créer et configurer le QLabel pour l'image
+        # Create and configure the QLabel for the image
         self.plumbobShine = PlumbobShine(self.initial_color, self.parent)
         self.plumbobShine.setGeometry(*geometry)
 
-        # Charger et configurer l'image si un chemin est fourni
+        # Load and configure the image if a path is provided
         if image_path:
             self.set_image(image_path)
 
-    def set_image(self, image_path):
-        """Configure l'image sur le QLabel."""
+    def set_image(self, image_path: str) -> None:
+        """Set the image on the QLabel."""
         pixmap = QPixmap(image_path)
         if not pixmap.isNull():
             pixmap = pixmap.scaled(
@@ -180,22 +172,18 @@ class QPlumbob:
             )
             self.plumbobShine.setPixmap(pixmap)
 
-    def change_color(self, color):
-        """Change la couleur du losange."""
+    def change_color(self, color: QColor) -> None:
+        """Change the color of the diamond."""
         self.plumbobBG.change_color(color)
 
 
 class ColorCircle(QWidget):
     currentColorChanged = pyqtSignal(QColor)
 
-    def __init__(
-        self, parent=None, startupcolor: list = [255, 255, 255], margin=10
-    ) -> None:
+    def __init__(self, parent: QWidget = None, startupcolor: list = [255, 255, 255], margin: int = 10) -> None:
         super().__init__(parent=parent)
         self.radius = 0
-        self.selected_color = QColor(
-            startupcolor[0], startupcolor[1], startupcolor[2], 255
-        )
+        self.selected_color = QColor(startupcolor[0], startupcolor[1], startupcolor[2], 255)
         self.x = 0.5
         self.y = 0.5
         self.h = self.selected_color.hueF()
@@ -241,7 +229,7 @@ class ColorCircle(QWidget):
         p.drawEllipse(self.square)
 
         line = QLineF.fromPolar(self.radius * self.s, 360 * self.h + 90)
-        line.translate(QPointF(self.rect().center()))  # Convertir en QPointF ici
+        line.translate(QPointF(self.rect().center()))
 
         # Draw the border with radial gradient
         border_rect = self.square.adjusted(-5, -5, 5, 5)
@@ -250,24 +238,24 @@ class ColorCircle(QWidget):
         border_grad = QRadialGradient(center, radius)
         border_grad.setColorAt(
             (border_rect.width() - 10) / border_rect.width(), QColor(255, 255, 255)
-        )  # Start color closer to the edge
-        border_grad.setColorAt(1.0, QColor(245, 245, 245))  # End color at the edge
+        )
+        border_grad.setColorAt(1.0, QColor(245, 245, 245))
         p.setPen(QPen(border_grad, 10))
         p.setBrush(Qt.GlobalColor.transparent)
         p.drawEllipse(border_rect)
 
         # shadow on picker
         shadow = QRadialGradient(line.p2() + QPointF(0, 1.5), 20)
-        shadow.setColorAt(0.4, QColor(0, 0, 0, 115))  # Start color
-        shadow.setColorAt(0.85, Qt.GlobalColor.transparent)  # End color
+        shadow.setColorAt(0.4, QColor(0, 0, 0, 115))
+        shadow.setColorAt(0.85, Qt.GlobalColor.transparent)
         p.setPen(Qt.PenStyle.NoPen)
         p.setBrush(shadow)
         p.drawEllipse(line.p2() + QPointF(0, 1.5), 20, 20)
 
         # picker
         border_grad = QRadialGradient(line.p2(), 10)
-        border_grad.setColorAt(12 / 14, QColor(255, 255, 255))  # Start color
-        border_grad.setColorAt(1.0, QColor(245, 245, 245))  # End color
+        border_grad.setColorAt(12 / 14, QColor(255, 255, 255))
+        border_grad.setColorAt(1.0, QColor(245, 245, 245))
         p.setPen(QPen(border_grad, 4))
         p.setBrush(self.selected_color)
         p.drawEllipse(line.p2(), 12, 12)
@@ -290,12 +278,10 @@ class ColorCircle(QWidget):
         if ev.button() == Qt.MouseButton.RightButton:
             self.h, self.s, self.v = 0, 0, 1
         else:
-            color = self.map_color(
-                ev.pos().x(), ev.pos().y()
-            )  # Utilisation de pos() ici
+            color = self.map_color(ev.pos().x(), ev.pos().y())
             self.h, self.s, self.v = color.hueF(), color.saturationF(), color.valueF()
-        self.x = ev.pos().x() / self.width()  # Utilisation de pos() ici
-        self.y = ev.pos().y() / self.height()  # Utilisation de pos() ici
+        self.x = ev.pos().x() / self.width()
+        self.y = ev.pos().y() / self.height()
         self.recalc()
 
     def mouseMoveEvent(self, ev: QMouseEvent) -> None:
